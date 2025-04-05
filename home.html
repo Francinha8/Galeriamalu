@@ -1,0 +1,240 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malu XV</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body, html {
+            height: 100%;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        .container {
+            position: relative;
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #FFD1DC;
+            padding: 20px;
+        }
+        .title {
+            color: #FF69B4;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .subtitle {
+            color: #4A4A4A;
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .background-image {
+    max-width: 90%;
+    max-height: 60vh;
+    object-fit: contain;  /* Mantém a proporção e mostra a imagem toda */
+    margin-bottom: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    /* Adicione estas propriedades */
+    width: auto;
+    height: auto;
+    display: block;
+}.background-image {
+    max-width: 90%;
+    max-height: 60vh;
+    object-fit: contain;  /* Mantém a proporção e mostra a imagem toda */
+    margin-bottom: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    /* Adicione estas propriedades */
+    width: auto;
+    height: auto;
+    display: block;
+}.background-image {
+    max-width: 90%;
+    max-height: 60vh;
+    object-fit: contain;  /* Mantém a proporção e mostra a imagem toda */
+    margin-bottom: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    /* Adicione estas propriedades */
+    width: auto;
+    height: auto;
+    display: block;
+}.background-image {
+    max-width: 90%;
+    max-height: 60vh;
+    object-fit: contain;  /* Mantém a proporção e mostra a imagem toda */
+    margin-bottom: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    /* Adicione estas propriedades */
+    width: auto;
+    height: auto;
+    display: block;
+}
+        .enter-button {
+            background-color: white;
+            color: #FF69B4;
+            border: 2px solid #FF69B4;
+            padding: 12px 40px;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .enter-button:hover {
+            background-color: #FF69B4;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        /* Caso não haja imagem disponível */
+        .placeholder-image {
+            width: 90%;
+            max-width: 500px;
+            height: 300px;
+            background: linear-gradient(45deg, #FFCCD5, #FFB6C1, #FF69B4);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        .placeholder-text {
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        /* Media queries melhoradas */
+        @media screen and (max-width: 768px) {
+            .enter-button {
+                padding: 10px 30px;
+                font-size: 1rem;
+                min-width: 150px;
+            }
+            .container {
+                padding: 15px;
+            }
+        }
+        
+        @media screen and (max-width: 480px) {
+            .enter-button {
+                padding: 8px 25px;
+                font-size: 0.9rem;
+                min-width: 120px;
+            }
+            .title {
+                font-size: 2rem;
+            }
+            .subtitle {
+                font-size: 1rem;
+            }
+        }
+        
+        /* Orientação paisagem em dispositivos pequenos */
+        @media screen and (max-height: 500px) and (orientation: landscape) {
+            .container {
+                flex-direction: row;
+                justify-content: space-around;
+                padding: 10px;
+            }
+            .background-image, .placeholder-image {
+                max-width: 45%;
+                margin-right: 20px;
+                margin-bottom: 0;
+            }
+            .text-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 45%;
+            }
+            .title {
+                font-size: 1.8rem;
+                margin-bottom: 0.5rem;
+            }
+            .subtitle {
+                font-size: 1rem;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% if debug %}
+            <!-- Versão alternativa que funciona em desenvolvimento -->
+            <div class="placeholder-image">
+                <div class="placeholder-text">Malu XV</div>
+            </div>
+        {% else %}
+            <!-- Tente várias possibilidades para a imagem -->
+            <img src="{% static 'photos/ribbon.png' %}" alt="Malu XV" class="background-image" onerror="this.onerror=null; handleImageError(this);">
+        {% endif %}
+        
+        <div class="text-container">
+            <a href="{% url 'galeria' %}" class="enter-button">Entrar na Galeria</a>
+        </div>
+    </div>
+
+    <script>
+        function handleImageError(img) {
+            // Tenta caminhos alternativos para a imagem
+            const altPaths = [
+                '/static/photos/images/malu-xv.png',
+                '/static/malu-xv.png',
+                '/media/malu-xv.png'
+            ];
+            
+            // Verifica cada caminho alternativo
+            let pathIndex = 0;
+            function tryNextPath() {
+                if (pathIndex < altPaths.length) {
+                    img.src = altPaths[pathIndex];
+                    pathIndex++;
+                } else {
+                    // Se nenhum caminho funcionar, mostra um placeholder
+                    replaceWithPlaceholder(img);
+                }
+            }
+            
+            img.onerror = tryNextPath;
+            tryNextPath();
+        }
+        
+        function replaceWithPlaceholder(img) {
+            // Cria um elemento de placeholder para substituir a imagem
+            const placeholder = document.createElement('div');
+            placeholder.className = 'placeholder-image';
+            
+            const text = document.createElement('div');
+            text.className = 'placeholder-text';
+            text.innerText = 'Malu XV';
+            
+            placeholder.appendChild(text);
+            img.parentNode.replaceChild(placeholder, img);
+        }
+    </script>
+</body>
+</html>

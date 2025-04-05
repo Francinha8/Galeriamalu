@@ -1,0 +1,660 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galeria Malu XV</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Playfair Display', serif;
+            background-color: #FFD1DC;
+            color: #4A4A4A;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            color: #FF69B4;
+            font-size: clamp(2rem, 5vw, 3rem);
+            margin-bottom: 1rem;
+        }
+        .upload-section {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        .btn {
+            background-color: #FF69B4;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            width: auto;
+            text-align: center;
+        }
+        .btn:hover {
+            background-color: #FF1493;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            justify-content: center;
+        }
+        .gallery-item {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 6px 12px rgba(255,105,180,0.2);
+            transition: transform 0.3s ease;
+            height: 100%;
+            position: relative;
+        }
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            display: block;
+        }
+        .download-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #FF69B4;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+        .gallery-item:hover .download-btn {
+            opacity: 1;
+        }
+        .download-btn:hover {
+            background-color: #FF69B4;
+            color: white;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+        
+        /* Vista de imagem ampliada */
+        .view-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+            text-align: center;
+        }
+        .view-modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 80vh;
+            margin-top: 5vh;
+        }
+        .view-modal-buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .view-modal-btn {
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #FF69B4;
+            border: none;
+            border-radius: 30px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        .view-modal-btn:hover {
+            background-color: #FF69B4;
+            color: white;
+        }
+        
+        /* Form Responsiveness */
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        form input[type="file"] {
+            margin-bottom: 1rem;
+            padding: 10px 0;
+            width: 100%;
+        }
+        form button[type="submit"] {
+            align-self: center;
+            margin-top: 10px;
+            min-width: 120px;
+        }
+        
+        /* Empty state message */
+        .empty-message {
+            text-align: center;
+            padding: 30px;
+            grid-column: 1 / -1;
+            font-size: 1.1rem;
+        }
+        
+        /* Navigation */
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .nav-links a {
+            margin: 0 15px;
+            color: #FF69B4;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Notificação de download */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            display: none;
+            z-index: 2000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        /* Media queries aprimoradas */
+        @media screen and (max-width: 992px) {
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+        }
+        
+        @media screen and (max-width: 768px) {
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 15px;
+            }
+            .gallery-item img {
+                height: 200px;
+            }
+            .modal-content {
+                margin: 15% auto;
+                width: 90%;
+                padding: 15px;
+            }
+            .container {
+                width: 95%;
+                padding: 15px;
+            }
+            .download-btn {
+                opacity: 1;
+                width: 35px;
+                height: 35px;
+            }
+        }
+        
+        @media screen and (max-width: 480px) {
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 10px;
+            }
+            .gallery-item img {
+                height: 150px;
+            }
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+                width: 80%;
+                max-width: 200px;
+            }
+            .modal-content {
+                margin: 20% auto;
+                padding: 15px 10px;
+                width: 95%;
+            }
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            .download-btn {
+                width: 30px;
+                height: 30px;
+                font-size: 0.8rem;
+            }
+            .view-modal-buttons {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+        }
+        
+        /* Para telas muito pequenas */
+        @media screen and (max-width: 320px) {
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+            .gallery-item img {
+                height: 180px;
+            }
+        }
+        
+        /* Melhoria para orientação paisagem em dispositivos pequenos */
+        @media screen and (max-height: 500px) and (orientation: landscape) {
+            .modal-content {
+                margin: 5% auto;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            .gallery-item img {
+                height: 120px;
+            }
+            .view-modal-content {
+                max-height: 60vh;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .form-text {
+            display: block;
+            margin-top: 5px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        input[type="file"] {
+            border: 1px dashed #FF69B4;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #fff5f8;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        input[type="file"]:hover {
+            background-color: #ffecf4;
+        }
+        .btn-upload {
+            background-color: #FF69B4;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 15px;
+            text-align: center;
+            display: block;
+            width: 100%;
+            max-width: 200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn-upload:hover {
+            background-color: #FF1493;
+        }
+        .preview-image {
+            width: 100%;
+            max-width: 150px;
+            max-height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 2px solid #FF69B4;
+            margin: 5px;
+            display: inline-block;
+        }
+        
+        /* Estilo para o container de prévia de múltiplas imagens */
+        .images-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        
+        /* Contador de arquivos selecionados */
+        .file-counter {
+            text-align: center;
+            margin: 10px 0;
+            font-weight: bold;
+            color: #FF69B4;
+        }
+        
+        /* Estilo para o botão de limpar seleção */
+        .clear-selection {
+            background-color: #f8f8f8;
+            color: #666;
+            border: 1px solid #ddd;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .clear-selection:hover {
+            background-color: #eee;
+            color: #333;
+        }
+        
+        /* Estilo para o label de upload */
+        .upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Galeria Malu XV</h1>
+        </div>
+        
+        <div class="nav-links">
+            <a href="{% url 'home' %}">Início</a>
+        </div>
+        
+        <div class="upload-section">
+            <button class="btn" onclick="openUploadModal()">Enviar Fotos</button>
+        </div>
+
+        <div class="gallery">
+            {% for photo in photos %}
+            <div class="gallery-item">
+                <img src="{{ photo.image.url }}" alt="Foto {{ forloop.counter }}" loading="lazy" onclick="openViewModal('{{ photo.image.url }}', '{{ photo.id }}')">
+                <button class="download-btn" title="Baixar imagem" onclick="downloadImage('{{ photo.image.url }}', 'malu-xv-foto-{{ photo.id }}')">
+                    <i class="fas fa-download"></i>
+                </button>
+            </div>
+            {% empty %}
+            <div class="empty-message">
+                <p>Nenhuma foto disponível ainda. Seja o primeiro a enviar!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Modal de Upload (Com suporte a múltiplos arquivos) -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeUploadModal()">&times;</span>
+            <h2>Enviar Fotos</h2>
+            <form method="post" enctype="multipart/form-data" action="{% url 'upload_photo' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <div class="upload-label">
+                        <label for="id_images">Selecione uma ou mais fotos:</label>
+                        <span id="fileCounter" class="file-counter"></span>
+                    </div>
+                    <input type="file" name="images" id="id_images" class="form-control" accept="image/*" multiple>
+                    <small class="form-text text-muted">Você pode selecionar várias fotos de uma vez (pressione Ctrl ou Cmd ao selecionar).</small>
+                </div>
+                <div id="imagePreview" class="images-preview-container"></div>
+                <button type="submit" class="btn-upload">Enviar Fotos</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal de Visualização de Imagem -->
+    <div id="viewModal" class="view-modal">
+        <span class="close" onclick="closeViewModal()" style="position:absolute; top:15px; right:25px; color:white;">&times;</span>
+        <img class="view-modal-content" id="viewImage">
+        <div class="view-modal-buttons">
+            <button id="downloadButton" class="view-modal-btn">
+                <i class="fas fa-download"></i> Baixar
+            </button>
+            <button class="view-modal-btn" onclick="closeViewModal()">
+                <i class="fas fa-times"></i> Fechar
+            </button>
+        </div>
+    </div>
+    
+    <!-- Notificação de download -->
+    <div id="notification" class="notification">
+        Download iniciado
+    </div>
+
+    <script>
+        // Modal functions
+        function openUploadModal() {
+            document.getElementById('uploadModal').style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restore scrolling
+        }
+        
+        // View image modal
+        function openViewModal(imageUrl, photoId) {
+            const modal = document.getElementById('viewModal');
+            const modalImg = document.getElementById('viewImage');
+            const downloadBtn = document.getElementById('downloadButton');
+            
+            modal.style.display = 'block';
+            modalImg.src = imageUrl;
+            document.body.style.overflow = 'hidden';
+            
+            // Configurar o botão de download
+            downloadBtn.onclick = function() {
+                downloadImage(imageUrl, 'malu-xv-foto-' + photoId);
+            };
+        }
+        
+        function closeViewModal() {
+            document.getElementById('viewModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Download function
+        function downloadImage(imageUrl, fileName) {
+            // Criar um link temporário
+            const link = document.createElement('a');
+            link.href = imageUrl;
+            link.download = fileName;
+            document.body.appendChild(link);
+            
+            // Disparar o clique para iniciar o download
+            link.click();
+            
+            // Remover o link temporário
+            document.body.removeChild(link);
+            
+            // Mostrar notificação
+            showNotification('Download iniciado');
+            
+            // Fechar o modal de visualização se estiver aberto
+            if (document.getElementById('viewModal').style.display === 'block') {
+                closeViewModal();
+            }
+        }
+        
+        // Mostrar notificação
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            // Esconder após 3 segundos
+            setTimeout(function() {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            var uploadModal = document.getElementById('uploadModal');
+            var viewModal = document.getElementById('viewModal');
+            
+            if (event.target == uploadModal) {
+                closeUploadModal();
+            }
+            
+            if (event.target == viewModal) {
+                closeViewModal();
+            }
+        }
+        
+        // Close modals with escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeUploadModal();
+                closeViewModal();
+            }
+        });
+
+        // Script para mostrar prévia das imagens selecionadas
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageInput = document.getElementById('id_images');
+            const previewDiv = document.getElementById('imagePreview');
+            const fileCounter = document.getElementById('fileCounter');
+            
+            imageInput.addEventListener('change', function() {
+                previewDiv.innerHTML = ''; // Limpar prévia anterior
+                
+                if (this.files && this.files.length > 0) {
+                    // Mostrar contador de arquivos
+                    const fileCount = this.files.length;
+                    fileCounter.textContent = fileCount + (fileCount === 1 ? ' arquivo selecionado' : ' arquivos selecionados');
+                    
+                    // Adicionar botão para limpar seleção
+                    if (!document.getElementById('clearButton')) {
+                        const clearBtn = document.createElement('button');
+                        clearBtn.id = 'clearButton';
+                        clearBtn.type = 'button';
+                        clearBtn.className = 'clear-selection';
+                        clearBtn.innerHTML = 'Limpar';
+                        clearBtn.onclick = function() {
+                            imageInput.value = null;
+                            previewDiv.innerHTML = '';
+                            fileCounter.textContent = '';
+                            this.remove();
+                        };
+                        fileCounter.appendChild(clearBtn);
+                    }
+                    
+                    // Limitar o número de prévias a mostrar
+                    const maxPreviews = 12;
+                    const previewCount = Math.min(this.files.length, maxPreviews);
+                    
+                    for (let i = 0; i < previewCount; i++) {
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(e) {
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.className = 'preview-image';
+                            previewDiv.appendChild(img);
+                        }
+                        
+                        reader.readAsDataURL(this.files[i]);
+                    }
+                    
+                    // Indicar se há mais arquivos que não estão sendo mostrados
+                    if (this.files.length > maxPreviews) {
+                        const moreDiv = document.createElement('div');
+                        moreDiv.style.textAlign = 'center';
+                        moreDiv.style.width = '100%';
+                        moreDiv.style.margin = '10px 0';
+                        moreDiv.innerHTML = '... e mais ' + (this.files.length - maxPreviews) + ' fotos';
+                        previewDiv.appendChild(moreDiv);
+                    }
+                } else {
+                    fileCounter.textContent = '';
+                    if (document.getElementById('clearButton')) {
+                        document.getElementById('clearButton').remove();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
